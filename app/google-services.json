@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "929335893465",
+    "firebase_url": "https://roadreview-74d69.firebaseio.com",
+    "project_id": "roadreview-74d69",
+    "storage_bucket": "roadreview-74d69.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:929335893465:android:858af14968154d17",
+        "android_client_info": {
+          "package_name": "com.example.roadreview"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "929335893465-ooltkrd3kqan93a33l5aagrlpn78mevf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.roadreview",
+            "certificate_hash": "92ad215f6ba885bdde73267f550d804e457c3855"
+          }
+        },
+        {
+          "client_id": "929335893465-5nqdducr8eve0bmbkbnmu77949qqirj9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhZmIyUoz65YkPIDxNm2NGdFX0b57Zp3c"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "929335893465-tr7676u31pb6maf3ta856bi1ob9neo8s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
