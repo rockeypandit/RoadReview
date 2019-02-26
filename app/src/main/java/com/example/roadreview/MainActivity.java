@@ -1,13 +1,18 @@
 package com.example.roadreview;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -28,28 +33,47 @@ import com.akhgupta.easylocation.EasyLocationAppCompatActivity;
 import com.akhgupta.easylocation.EasyLocationRequest;
 import com.akhgupta.easylocation.EasyLocationRequestBuilder;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class MainActivity extends EasyLocationAppCompatActivity {
     private static final int CAMERA_REQUEST = 1888;
     private ImageView imageView;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
-    Double myLatitude,myLongitude;
+    Double myLatitude, myLongitude;
+    FirebaseUser currentuser;
 
+    private ProgressDialog mProgressDialog;
     double lat, lng;
-
+    Uri downloadUri;
+    Uri uri;
     private DatabaseReference mDatabase, mDatabaseUser, mDatabaseList;
     String place;
+    StorageReference imageRef;
     Geocoder geo;
-
+    Bitmap photo;
     boolean gps_enabled;
-
+    StorageReference filePath;
     private LocationManager locationManager;
     private LocationListener locationListener;
+    Button sendButton;
+    private Bitmap oldDrawable;
 
 
     @Override
@@ -57,122 +81,17 @@ public class MainActivity extends EasyLocationAppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        this.imageView = (ImageView) this.findViewById(R.id.imageView1);
+        imageView = (ImageView) this.findViewById(R.id.imageView1);
         Button photoButton = (Button) this.findViewById(R.id.button1);
+        sendButton = (Button) this.findViewById(R.id.send);
+        oldDrawable = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+        mProgressDialog = new ProgressDialog(this);
+        currentuser = FirebaseAuth.getInstance().getCurrentUser();
+
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        mDatabaseUser = FirebaseDatabase.getInstance().getReference().child("User");
-        mDatabaseList = FirebaseDatabase.getInstance().getReference().child("List");
-
-
-        //locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-//        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-//        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 0.0f, this);
-//        gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
-
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-
-            ActivityCompat.requestPermissions(this,new String[] { Manifest.permission.ACCESS_FINE_LOCATION},1);
-
-
-        }
-        else {
-//            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
-
-        }
-      //  locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-
-
-
-//LOCATION OLD
-
-
-//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ) {
-//
-//
-////            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-////                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
-//
-//                geo = new Geocoder(this, Locale.getDefault());
-//
-//
-//
-//                GetLoc.requestSingleUpdate(this, new GetLoc.LocationCallback() {
-//                    @Override public void onNewLocationAvailable(GetLoc.GPSCoordinates location) {
-//                        lat = location.latitude;
-//                        lng = location.longitude;
-//                        Log.d("GetLocation", "LATITUDE " + location.latitude);
-//                        Log.d("GetLocation", "LATITUDE " + location.longitude);
-//
-//                        //PLACE
-//                        try {
-//                            List<Address> addresses = geo.getFromLocation(lat, lng, 1);
-//
-//
-//                            if (addresses.isEmpty()) {
-//                                place = "Waiting for GetLocation";
-//                            } else {
-//                                if (addresses.size() > 0) {
-//                                    place = addresses.get(0).getFeatureName() + "," + addresses.get(0).getLocality() + "," + addresses.get(0).getAdminArea() + ", " + addresses.get(0).getCountryName();
-//                                }
-//                            }
-//
-//                        }catch (Exception e){}
-//                        Log.d("PLACE :",place);
-//
-//
-//
-//                    }
-//                });
-//
-//
-////            } else {
-////                // do request the permission
-////                Log.i("LOCATION","ERRORRR");
-////                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 8);
-////                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 8);
-////
-////
-////
-////            }
-//        }
-//        else {
-//                // do request the permission
-//                Log.i("LOCATION","ERRORRR");
-//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 8);
-//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-//
-//
-//
-//            }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        mDatabaseUser = FirebaseDatabase.getInstance().getReference().child("User").child(currentuser.getUid()).push();
+        mDatabaseList = FirebaseDatabase.getInstance().getReference().child("List").push();
 
 
         photoButton.setOnClickListener(new View.OnClickListener() {
@@ -189,127 +108,83 @@ public class MainActivity extends EasyLocationAppCompatActivity {
             }
         });
 
+        locationRequest();
 
 
+        filePath = FirebaseStorage.getInstance().getReference().child("Images " + System.currentTimeMillis());
 
 
+        Log.i("IMAGE", imageView.getDrawable().toString());
+
+        final HashMap<String, Object> result = new HashMap<>();
 
 
-
-}
-
-
-
-
-
-
-    public void locationRequest(){
-        LocationRequest locationRequest = new LocationRequest()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(5000)
-                .setFastestInterval(5000);
-        EasyLocationRequest easyLocationRequest = new EasyLocationRequestBuilder()
-                .setLocationRequest(locationRequest)
-                .setFallBackToLastLocationTime(3000)
-                .build();
-
-        requestLocationUpdates(easyLocationRequest);
-    }
-
-
-
-
-//    locationListener = new LocationListener() {
-//        @Override
-//        public void onLocationChanged(GetLocation location) {
-//            Log.d("LOCATION", location.toString());
-//        }
-//
-//        @Override
-//        public void onStatusChanged(String provider, int status, Bundle extras) {
-//
-//        }
-//
-//        @Override
-//        public void onProviderEnabled(String provider) {
-//
-//        }
-//
-//        @Override
-//        public void onProviderDisabled(String provider) {
-//
-//        }
-//    };
-
-
+        sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            public void onClick(View v) {
 
-//                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ){
-//                    //Start your code
-//                } else {
-//                    //Show snackbar
-//                }
+                mProgressDialog.setMessage("UPLOADING");
+                mProgressDialog.show();
 
 
-//                if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED){
-//                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-//
-//                }
 
 
-                if (grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    if(ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED){
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+                filePath.putFile(uri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                    @Override
+                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                        if (!task.isSuccessful()) {
+                            throw task.getException();
+                        }
+                        return filePath.getDownloadUrl();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        if (task.isSuccessful()) {
+                            downloadUri = task.getResult();
+
+                            Log.i("LINK " ,downloadUri.toString());
+
+//                            FriendlyMessage friendlyMessage = new FriendlyMessage(null, mUsername, downloadUri.toString());
+//                            mMessagesDatabaseReference.push().setValue(friendlyMessage);
+                            mProgressDialog.dismiss();
+                            Toast.makeText(MainActivity.this, "UPLOAD SUCCESS", Toast.LENGTH_LONG).show();
+                            result.put("Image",downloadUri.toString());
+                            mDatabaseUser.setValue(result);
+                            mDatabaseList.setValue(result);
+
+
+
+                        } else {
+                            Toast.makeText(MainActivity.this, "upload failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+
 
                     }
-                }
 
 
+                });
+
+                result.put("Image",downloadUri);
+                result.put("lat", myLatitude);
+                result.put("lng", myLongitude);
 
 
-
-
-
-//                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ){
-//                    //Start your code
-//                } else {
-//                    Toast.makeText(this, "GPS permission denied", Toast.LENGTH_LONG).show();
-//                }
-
-
-
-                if (requestCode == MY_CAMERA_PERMISSION_CODE) {
-                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
-                        Intent cameraIntent = new
-                                Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                        startActivityForResult(cameraIntent, CAMERA_REQUEST);
-                    } else {
-                        Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
-                    }
-
-                }
-
-
-
-
-
+                mDatabaseUser.setValue(result);
+                 //mDatabaseUser.push();
+                mDatabaseList.setValue(result);
 
 
 
 
 
             }
+        });
 
 
-                protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-                    if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
-                        Bitmap photo = (Bitmap) data.getExtras().get("data");
-                        imageView.setImageBitmap(photo);
-                    }
-                }
+    }
+
 
     @Override
     public void onLocationPermissionGranted() {
@@ -323,9 +198,30 @@ public class MainActivity extends EasyLocationAppCompatActivity {
 
     @Override
     public void onLocationReceived(Location location) {
+        String text = "try";
+        try {
+            Geocoder geo = new Geocoder(this.getApplicationContext(), Locale.getDefault());
+            List<Address> addresses = geo.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+            if (addresses.isEmpty()) {
+                // locationTextBox.setText("Waiting for Location");
+            } else {
+                if (addresses.size() > 0) {
+
+                    text = (addresses.get(0).getFeatureName() + "," + addresses.get(0).getLocality() + "," + addresses.get(0).getAdminArea() + ", " + addresses.get(0).getCountryName());
+
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         myLatitude = location.getLatitude();
         myLongitude = location.getLongitude();
-        Log.i("latitude",myLatitude.toString());
+        //    System.out.println("coordinates:"+"lat="+location.getLatitude()+" lon="+location.getLongitude()+" accuracy="+location.getAccuracy());
+        // Log.i("PLACE ",text);
+
+
     }
 
     @Override
@@ -337,6 +233,120 @@ public class MainActivity extends EasyLocationAppCompatActivity {
     public void onLocationProviderDisabled() {
 
     }
+
+
+    public void locationRequest() {
+        LocationRequest locationRequest = new LocationRequest()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(5000)
+                .setFastestInterval(5000);
+        EasyLocationRequest easyLocationRequest = new EasyLocationRequestBuilder()
+                .setLocationRequest(locationRequest)
+                .setFallBackToLastLocationTime(3000)
+                .build();
+
+        requestLocationUpdates(easyLocationRequest);
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+            }
+        }
+
+
+        if (requestCode == MY_CAMERA_PERMISSION_CODE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
+                Intent cameraIntent = new
+                        Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+            } else {
+                Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
+            }
+
+        }
+
+
+    }
+
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
+            photo = (Bitmap) data.getExtras().get("data");
+            imageView.setImageBitmap(photo);
+            Bundle extras = data.getExtras();
+
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+
+
+            //data.getData();
+
+//                        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+//                        photo.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+//                        String path = MediaStore.Images.Media.insertImage(MainActivity.this.getContentResolver(), photo, "Title", null);
+//                        uri = Uri.parse(path);
+
+          //  uri = getImageUri(getApplicationContext(), imageBitmap);
+            Uri tempUri = getImageUri(getApplicationContext(), photo);
+            File finalFile = new File(getRealPathFromURI(tempUri));
+            uri = tempUri;
+
+
+
+            Log.i("URI", tempUri.toString());
+
+
+            Bitmap newDrawable = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+            if (newDrawable != oldDrawable) {
+                sendButton.setVisibility(View.VISIBLE);
+            }
+
+
+        }
+    }
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+    public String getRealPathFromURI(Uri uri) {
+        String path = "";
+        if (getContentResolver() != null) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            if (cursor != null) {
+                cursor.moveToFirst();
+                int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                path = cursor.getString(idx);
+                cursor.close();
+            }
+        }
+        return path;
+    }
+
+
+
+
+
+
+
+
+//    public Uri getImageUri(Context inContext, Bitmap inImage) {
+//        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+//        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+//        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+//        return Uri.parse(path);
+//    }
+
+
 }
 
 
