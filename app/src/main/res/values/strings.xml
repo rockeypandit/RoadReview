@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">RoadReview</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_accelerometer_map">Map</string>
+    <string name="title_activity_get_location">GetLocation</string>
 </resources>

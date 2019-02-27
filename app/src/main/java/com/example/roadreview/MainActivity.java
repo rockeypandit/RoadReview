@@ -72,7 +72,7 @@ public class MainActivity extends EasyLocationAppCompatActivity {
     StorageReference filePath;
     private LocationManager locationManager;
     private LocationListener locationListener;
-    Button sendButton,gotoMap;
+    Button sendButton,gotoMap,gotoAcc;
     private Bitmap oldDrawable;
 
 
@@ -107,6 +107,23 @@ public class MainActivity extends EasyLocationAppCompatActivity {
                 finish();
             }
         });
+
+        gotoAcc = findViewById(R.id.acc);
+        gotoAcc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,AccelerometerMap.class);
+                Bundle b = new Bundle();
+                b.putString("lat", myLatitude.toString());
+                b.putString("lng", myLongitude.toString());
+                intent.putExtras(b);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+
+
 
 
 
