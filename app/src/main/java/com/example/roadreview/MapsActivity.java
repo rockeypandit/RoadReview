@@ -235,4 +235,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     }
+
+    public void onBackPressed(){
+        Intent intent = new Intent(MapsActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
 }

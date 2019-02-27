@@ -3,10 +3,13 @@ package com.example.roadreview;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -27,6 +30,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.common.util.Strings;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -44,7 +48,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccelerometerMap  extends FragmentActivity implements LocationListener,
+public class AccelerometerMap  extends FragmentActivity implements LocationListener, SensorEventListener,
         OnMapReadyCallback, GoogleApiClient
                 .ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -52,6 +56,7 @@ public class AccelerometerMap  extends FragmentActivity implements LocationListe
 
     private SensorManager sensorManager;
     Sensor accelerometer;
+    int myColor = Color.GREEN;
 
 
 
@@ -73,8 +78,8 @@ int check=0;
 LatLng temp;
 
     private static final String TAG = "LocationActivity";
-    private static final long INTERVAL = 1000 * 10;
-    private static final long FASTEST_INTERVAL = 1000 * 5;
+    private static final long INTERVAL = 1000 * 5;
+    private static final long FASTEST_INTERVAL = 1000 * 2;
     Button btnFusedLocation;
     TextView tvLocation;
     LocationRequest mLocationRequest;
@@ -82,6 +87,11 @@ LatLng temp;
     Location mCurrentLocation;
     String mLastUpdateTime;
     private Location previousLocation;
+
+    List X,Y,Z;
+
+
+
 
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
@@ -94,6 +104,11 @@ LatLng temp;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accelerometer_map);
+
+
+        X = new ArrayList<Strings>();
+        Y = new ArrayList<Strings>();
+        Z = new ArrayList<Strings>();
 
 
         contLat = new ArrayList();
@@ -111,7 +126,7 @@ LatLng temp;
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-       // sensorManager.registerListener(AccelerometerMap.this,accelerometer,SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(AccelerometerMap.this,accelerometer,SensorManager.SENSOR_DELAY_NORMAL);
 
 
 
@@ -145,7 +160,53 @@ LatLng temp;
         };
     }
 
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        X.add(event.values[0]+"");
+        Y.add(event.values[1]+"");
+        Z.add(event.values[2]+"");
 
+        Double dX,dY,dZ,finalAcc;
+
+        for(int i = 0;i<X.size();i++){
+            dX =Double.parseDouble(X.get(i).toString());
+            if (dX<0)
+                dX = dX*-1;
+            dY =Double.parseDouble(Y.get(i).toString());
+            if (dY<0)
+                dY = dY*-1;
+            dZ =Double.parseDouble(Z.get(i).toString());
+            if (dZ<0)
+                dZ = dZ*-1;
+
+            finalAcc = dX+dY+dZ;
+            if (finalAcc<20){
+                myColor = Color.GREEN;
+            }else if (finalAcc<40 && finalAcc >20){
+                myColor = Color.YELLOW;
+            }
+            else
+                myColor = Color.RED;
+
+
+
+
+
+
+
+            i+=20;
+        }
+
+
+
+
+        Log.d("  VALUE X : "+ event.values[0],"  VALUE Y : "+ event.values[1]+"    VALUE Z : "+ event.values[2]);
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -249,7 +310,7 @@ LatLng temp;
         Polyline line = mMap.addPolyline(new PolylineOptions()
                 .add(new LatLng(temp.latitude, temp.longitude), new LatLng(toPosition.latitude, toPosition.longitude))
                 .width(8)
-                .color(Color.RED));
+                .color(myColor));
         temp = toPosition;
 
 
@@ -392,4 +453,12 @@ LatLng temp;
             Log.d(TAG, "Location update resumed .....................");
         }
     }
+
+    public void onBackPressed(){
+        Intent intent = new Intent(AccelerometerMap.this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+
 }

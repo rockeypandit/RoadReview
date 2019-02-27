@@ -26,7 +26,7 @@
 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
+            android:layout_margin="6dp"
             android:layout_weight="0.5"
             android:text="PHOTO" />
         <Button
@@ -34,16 +34,24 @@
 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
+            android:layout_margin="6dp"
             android:layout_weight="0.5"
-            android:text="ACCELEROMETER" />
+            android:text="Hand Free" />
 
         <Button
             android:id="@+id/map"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            android:layout_margin="8dp"
+            android:layout_margin="6dp"
+            android:layout_weight="0.5"
+            android:text="MAP" />
+        <Button
+            android:id="@+id/mapGlobal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_margin="6dp"
             android:layout_weight="0.5"
             android:text="MAP" />
     </LinearLayout>
