@@ -7,27 +7,51 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainActivity">
-
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="PHOTO"/>
-    <Button
-        android:id="@+id/send"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="SEND"/>
-
     <ImageView
         android:id="@+id/imageView1"
         android:layout_margin="50dp"
-        android:layout_height="500dp"
+        android:layout_height="450dp"
         android:layout_width="400dp"
         android:layout_gravity="center"
         android:src="@drawable/common_full_open_on_phone"
         />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button1"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_weight="0.5"
+            android:text="PHOTO" />
+
+        <Button
+            android:id="@+id/map"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_margin="8dp"
+            android:layout_weight="0.5"
+            android:text="MAP" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <Button
+        android:id="@+id/send"
+        android:layout_margin="17dp"
+android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SEND"/>
+    </LinearLayout>
+
 
 
 

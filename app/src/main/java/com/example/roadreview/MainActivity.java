@@ -72,7 +72,7 @@ public class MainActivity extends EasyLocationAppCompatActivity {
     StorageReference filePath;
     private LocationManager locationManager;
     private LocationListener locationListener;
-    Button sendButton;
+    Button sendButton,gotoMap;
     private Bitmap oldDrawable;
 
 
@@ -92,6 +92,22 @@ public class MainActivity extends EasyLocationAppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mDatabaseUser = FirebaseDatabase.getInstance().getReference().child("User").child(currentuser.getUid()).push();
         mDatabaseList = FirebaseDatabase.getInstance().getReference().child("List").push();
+
+
+        gotoMap = findViewById(R.id.map);
+        gotoMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+                Bundle b = new Bundle();
+                b.putString("lat", myLatitude.toString());
+                b.putString("lng", myLongitude.toString());
+                intent.putExtras(b);
+                startActivity(intent);
+                finish();
+            }
+        });
+
 
 
         photoButton.setOnClickListener(new View.OnClickListener() {
